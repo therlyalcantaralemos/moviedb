@@ -1,0 +1,19 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/moviedb
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    mapper:
+      ACCEPT_CASE_INSENSITIVE_ENUMS: true
+
+moviedb:
+  image:
+    url: https://image.tmdb.org/t/p/original
+  api:
+    url: https://api.themoviedb.org/3/
+    key: 28acd382c495c4a27daa1b8ac6c986b3
+    language: pt-BR
+    region: BR
+
+
