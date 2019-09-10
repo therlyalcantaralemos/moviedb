@@ -1,5 +1,7 @@
 package com.moviedb.models.themoviedb;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -12,8 +14,7 @@ public class MovieResult {
     private Integer voteCount;
     private Boolean video;
     private String posterPath;
-    @JsonProperty("id")
-    private Long movieId;
+    private Long id;
     private Boolean adult;
     private String backdropPath;
     private String originalLanguage;

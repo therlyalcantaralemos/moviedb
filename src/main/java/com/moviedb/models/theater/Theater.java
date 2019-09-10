@@ -19,8 +19,10 @@ public class Theater {
     private String name;
     private String address;
     @CreatedDate
+    @JsonIgnore
     private LocalDateTime createdAt;
     @LastModifiedDate
+    @JsonIgnore
     private LocalDateTime updatedAt;
     @Version
     @JsonIgnore

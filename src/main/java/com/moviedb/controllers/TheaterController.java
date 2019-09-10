@@ -1,5 +1,6 @@
 package com.moviedb.controllers;
 
+import com.moviedb.models.theater.Theater;
 import com.moviedb.models.theater.TheaterDTO;
 import com.moviedb.services.TheaterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,31 +22,31 @@ public class TheaterController {
 
     @GetMapping
     @ResponseStatus(value = HttpStatus.OK)
-    private List<TheaterDTO> listAll(){
+    public List<Theater> listAll(){
         return theaterService.listAll();
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(value = HttpStatus.OK)
-    private TheaterDTO listById(@PathVariable String id){
+    public Theater listById(@PathVariable String id){
         return theaterService.listById(id);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    private TheaterDTO create(@Valid @RequestBody TheaterDTO theaterRequest){
-        return theaterService.create(theaterRequest);
+    public Theater create(@Valid @RequestBody TheaterDTO theaterDTO){
+        return theaterService.create(theaterDTO);
     }
 
-    @PutMapping()
+    @PutMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    private void update(@Valid @RequestBody TheaterDTO theaterRequest){
-        theaterService.update(theaterRequest);
+    public void update(@PathVariable("id") String id, @Valid @RequestBody TheaterDTO theaterDTO){
+        theaterService.update(id, theaterDTO);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    private void delete(@PathVariable String id){
+    public void delete(@PathVariable String id){
         theaterService.delete(id);
     }
 

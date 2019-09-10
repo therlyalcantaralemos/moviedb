@@ -1,14 +1,20 @@
 package com.moviedb.models.session;
 
-import com.moviedb.models.movie.Movie;
-import com.moviedb.models.theater.Theater;
 import lombok.Data;
+
+import javax.validation.constraints.NotEmpty;
+import java.time.LocalDateTime;
 
 @Data
 public class SessionDTO {
+    @NotEmpty
     private String room;
-    private String date;
+    @NotEmpty
+    private LocalDateTime date;
+    @NotEmpty
     private String type;
-    private Theater theater;
-    private Movie movie;
+    @NotEmpty
+    private String movieId;
+    @NotEmpty
+    private String theaterId;
 }

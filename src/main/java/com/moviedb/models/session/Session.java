@@ -21,8 +21,10 @@ public class Session {
     private Theater theater;
     private Movie movie;
     @CreatedDate
+    @JsonIgnore
     private LocalDateTime createdAt;
     @LastModifiedDate
+    @JsonIgnore
     private LocalDateTime updatedAt;
     @Version
     @JsonIgnore

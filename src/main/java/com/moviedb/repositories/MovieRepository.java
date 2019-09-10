@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,6 +17,6 @@ public interface MovieRepository extends MongoRepository<Movie, String> {
 
     void deleteByUpdatedAtLessThan(LocalDateTime updatedAt);
 
-    Page<Movie> findByGenresIgnoreCaseIn(String name, Pageable pageable);
+    Page<Movie> findByGenresIgnoreCaseIn(List<String> name, Pageable pageable);
 
 }

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,11 +52,11 @@ public class MovieService {
         if(movieTheMovieDB.getTotalPages() > 1) {
             Stream.iterate(2, n -> n + 1)
                     .limit((movieTheMovieDB.getTotalPages() - 1))
-                    .forEach(page -> {
+                    .forEach(page ->
                         movieTheMovieDB.getResults().addAll(
                                 Objects.requireNonNull(theMovieDBService.getMovieNowPlayingApi(page)).getResults()
-                        );
-                    });
+                        )
+                    );
         }
     }
 
@@ -90,6 +91,7 @@ public class MovieService {
          return getAllMoviesApiNowPlaying().stream()
                 .map(movieDB -> {
                     Movie movieMapper = objectMapper.convertValue(movieDB, Movie.class);
+                    movieMapper.setMovieId(movieDB.getId());
                     movieMapper.setId(null);
                     return movieMapper;
                 }).collect(Collectors.toList());
@@ -103,7 +105,7 @@ public class MovieService {
     public void createOrUpdate(){
         LocalDateTime localTime = LocalDateTime.now();
 
-        getMovies().forEach(movie -> {
+        getMovies().forEach(movie ->
                 movieRepository.findByMovieId(movie.getMovieId())
                     .ifPresentOrElse(movieOpt ->  {
                             movieOpt.updateWith(movie);
@@ -112,14 +114,14 @@ public class MovieService {
                         }, () -> {
                             movieRepository.save(movie);
                             logger.error("created movie: {}", movie.getMovieId());
-                        });
-            });
+                        })
+            );
 
         movieRepository.deleteByUpdatedAtLessThan(localTime);
     }
 
     public Page<MovieDTO> listByGenre(String name, Pageable page){
-        Page<Movie> movieGenres = movieRepository.findByGenresIgnoreCaseIn(name, page);
+        Page<Movie> movieGenres = movieRepository.findByGenresIgnoreCaseIn(Collections.singletonList(name), page);
         if(!movieGenres.isEmpty()){
             return movieGenres.map(movie -> objectMapper.convertValue(movie, MovieDTO.class));
         }else{
@@ -135,5 +137,4 @@ public class MovieService {
             throw new ObjectNotFoundException();
         }
     }
-
 }
