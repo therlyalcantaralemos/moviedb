@@ -1,6 +1,7 @@
 package com.moviedb.models.movie;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Document
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Movie {
     @Id
     private String id;
@@ -32,6 +34,7 @@ public class Movie {
     private Date releaseDate;
     private List<String> genres;
     private Credit credits;
+    private List<Session> sessions;
     @CreatedDate
     @JsonIgnore
     private LocalDateTime createdAt;
@@ -58,5 +61,7 @@ public class Movie {
         this.releaseDate = otherMovie.getReleaseDate();
         this.genres = otherMovie.getGenres();
         this.credits = otherMovie.getCredits();
+        this.sessions = otherMovie.getSessions();
+
     }
 }

@@ -1,12 +1,13 @@
 package com.moviedb.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moviedb.models.movie.Credit;
-import com.moviedb.models.movie.Movie;
-import com.moviedb.models.movie.MovieDTO;
+import com.moviedb.models.movie.*;
+import com.moviedb.models.theater.Theater;
 import com.moviedb.models.themoviedb.*;
 import com.moviedb.repositories.MovieRepository;
+import com.moviedb.repositories.TheaterRepository;
 import com.moviedb.services.exceptions.ApiResultNotFoundException;
+import com.moviedb.services.exceptions.DocumentExistsException;
 import com.moviedb.services.exceptions.ObjectNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,14 +26,16 @@ import java.util.stream.Stream;
 public class MovieService {
     private TheMovieDBService theMovieDBService;
     private MovieRepository movieRepository;
+    private TheaterRepository theaterRepository;
     private final ObjectMapper objectMapper;
 
     private final Logger logger = LoggerFactory.getLogger(MovieService.class);
 
     @Autowired
-    public MovieService(TheMovieDBService theMovieDBService, MovieRepository movieRepository, ObjectMapper objectMapper) {
+    public MovieService(TheMovieDBService theMovieDBService, MovieRepository movieRepository, TheaterRepository theaterRepository, ObjectMapper objectMapper) {
         this.theMovieDBService = theMovieDBService;
         this.movieRepository = movieRepository;
+        this.theaterRepository = theaterRepository;
         this.objectMapper = objectMapper;
     }
 
@@ -120,8 +121,8 @@ public class MovieService {
         movieRepository.deleteByUpdatedAtLessThan(localTime);
     }
 
-    public Page<MovieDTO> listByGenre(String name, Pageable page){
-        Page<Movie> movieGenres = movieRepository.findByGenresIgnoreCaseIn(Collections.singletonList(name), page);
+    public Page<MovieDTO> listByGenre(String theaterId, String name, Pageable page){
+        Page<Movie> movieGenres = movieRepository.findBySessions_TheaterIdAndGenresIgnoreCaseIn(theaterId, Collections.singletonList(name), page);
         if(!movieGenres.isEmpty()){
             return movieGenres.map(movie -> objectMapper.convertValue(movie, MovieDTO.class));
         }else{
@@ -129,12 +130,69 @@ public class MovieService {
         }
     }
 
-    public Page<MovieDTO> listAll(Pageable page){
-        Page<Movie> movies = movieRepository.findAll(page);
+    public Page<MovieDTO> listAll(String theaterId, Pageable page){
+        Page<Movie> movies = movieRepository.findBySessions_TheaterId(theaterId, page);
         if(!movies.isEmpty()){
             return movies.map(movie -> objectMapper.convertValue(movie, MovieDTO.class));
         }else{
             throw new ObjectNotFoundException();
         }
+    }
+
+    public SessionDTO createSessionInMovie(String theaterId, SessionRequestDTO sessionDTO) {
+        Movie movie = movieRepository.findByMovieId(Long.parseLong(sessionDTO.getIdMovie())).orElseThrow(ObjectNotFoundException::new);
+        Theater theater = theaterRepository.findById(theaterId).orElseThrow(ObjectNotFoundException::new);
+        movieRepository.findSessionsByTheaterAndRoomAndDateQuery(theaterId, sessionDTO.getRoom(), sessionDTO.getDate()).ifPresent( findSession -> { throw new DocumentExistsException(); });
+
+        Session session = objectMapper.convertValue(sessionDTO, Session.class);
+        session.setId(UUID.randomUUID().toString());
+        session.setTheaterId(theaterId);
+
+        if(Objects.isNull(movie.getSessions())){
+            movie.setSessions(Collections.singletonList(session));
+        }else{
+            movie.getSessions().add(session);
+        }
+        movieRepository.save(movie);
+
+        SessionDTO sessionDto = objectMapper.convertValue(session, SessionDTO.class);
+        sessionDto.setMovie(movie);
+        sessionDto.setTheater(theater);
+
+        return sessionDto;
+    }
+
+    public void updateSessionInMovie(String theaterId, String sessionId, SessionUpdateDTO sessionUpdateDTO) {
+        Movie movie = movieRepository.findBySessions_TheaterIdAndSessions_Id(theaterId, sessionId).orElseThrow(ObjectNotFoundException::new);
+        movieRepository.findSessionsByIdAndTheaterAndRoomAndDateQuery(sessionId, theaterId, sessionUpdateDTO.getRoom(), sessionUpdateDTO.getDate()).ifPresent( findSession -> { throw new DocumentExistsException(); });
+        movie.getSessions().forEach(session -> {
+                    if(session.getId().equals(sessionId)){
+                        session.setDate(sessionUpdateDTO.getDate());
+                        session.setRoom(sessionUpdateDTO.getRoom());
+                        session.setType(sessionUpdateDTO.getType());
+                    }
+                });
+
+        movieRepository.save(movie);
+    }
+
+    public void deleteSessionInMovie(String theaterId, String sessionId){
+        Movie movie = movieRepository.findBySessions_TheaterIdAndSessions_Id(theaterId, sessionId).orElseThrow(ObjectNotFoundException::new);
+        movie.getSessions().removeIf(session -> session.getId().equals(sessionId));
+        movieRepository.save(movie);
+    }
+
+
+    public SessionDTO listSession(String theaterId, String sessionId) {
+        Movie movie = movieRepository.findBySessions_TheaterIdAndSessions_Id(theaterId, sessionId).orElseThrow(ObjectNotFoundException::new);
+        Theater theater = theaterRepository.findById(theaterId).orElseThrow(ObjectNotFoundException::new);
+
+        Session session = movie.getSessions().stream().filter(findSession -> findSession.getId().equals(sessionId)).findFirst().get();
+
+        SessionDTO sessionDto = objectMapper.convertValue(session, SessionDTO.class);
+        sessionDto.setMovie(movie);
+        sessionDto.setTheater(theater);
+
+        return sessionDto;
     }
 }

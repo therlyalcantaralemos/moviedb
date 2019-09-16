@@ -1,18 +1,21 @@
 package com.moviedb.models.movie;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.moviedb.models.themoviedb.CreditResult;
 import com.moviedb.models.themoviedb.GenreResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MovieDTO {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class MovieDTO implements Serializable {
     private Double popularity;
     private Integer voteCount;
     private Boolean video;
@@ -28,4 +31,6 @@ public class MovieDTO {
     private Date releaseDate;
     private List<GenreResult> genres;
     private CreditResult credits;
+    private List<Session> sessions;
+
 }
