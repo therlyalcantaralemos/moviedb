@@ -34,8 +34,8 @@ public class MovieController {
 
     @PostMapping("/session")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public SessionDTO createSessionInMovie(@PathVariable("theaterId") String theaterId,
-                                           @RequestBody SessionRequestDTO sessionDTO){
+    public MovieSessionDTO createSessionInMovie(@PathVariable("theaterId") String theaterId,
+                                                @RequestBody SessionRequestDTO sessionDTO){
         return movieService.createSessionInMovie(theaterId, sessionDTO);
     }
 
@@ -56,8 +56,8 @@ public class MovieController {
 
     @GetMapping("/session/{sessionId}")
     @ResponseStatus(value = HttpStatus.OK)
-    public SessionDTO listSession(@PathVariable("theaterId") String theaterId,
-                                  @PathVariable("sessionId") String sessionId){
+    public MovieSessionDTO listSession(@PathVariable("theaterId") String theaterId,
+                                       @PathVariable("sessionId") String sessionId){
         return movieService.listSession(theaterId, sessionId);
     }
 

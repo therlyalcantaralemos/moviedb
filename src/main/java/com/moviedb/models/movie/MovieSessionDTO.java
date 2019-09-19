@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class SessionDTO {
+public class MovieSessionDTO {
     private String id;
     private String room;
     private LocalDateTime date;

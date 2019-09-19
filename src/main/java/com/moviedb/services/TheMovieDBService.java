@@ -30,7 +30,7 @@ public class TheMovieDBService {
         this.webClient = webClientBuilder.build();
     }
 
-    public String getUrlApi(String path, Integer pageNumber){
+    private String getUrlApi(String path, Integer pageNumber){
         return apiUrl + path +
                 "?api_key=" + apiKey +
                 "&language=" + apiLanguage +

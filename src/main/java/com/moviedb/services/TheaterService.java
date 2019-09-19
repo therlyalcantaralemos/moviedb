@@ -1,6 +1,7 @@
 package com.moviedb.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moviedb.Factories.TheaterFactory;
+import com.moviedb.common.Constants;
 import com.moviedb.models.theater.Theater;
 import com.moviedb.models.theater.TheaterDTO;
 import com.moviedb.repositories.TheaterRepository;
@@ -14,22 +15,22 @@ import java.util.List;
 @Service
 public class TheaterService {
     private TheaterRepository theaterRepository;
-    private final ObjectMapper objectMapper;
+    private TheaterFactory theaterFactory;
 
     @Autowired
-    public TheaterService(TheaterRepository theaterRepository, ObjectMapper objectMapper) {
+    public TheaterService(TheaterRepository theaterRepository, TheaterFactory theaterFactory) {
         this.theaterRepository = theaterRepository;
-        this.objectMapper = objectMapper;
+        this.theaterFactory = theaterFactory;
     }
 
-    public Theater create(TheaterDTO theaterDTO){
-        theaterRepository.findByName(theaterDTO.getName()).ifPresent(findTheater -> { throw new DocumentExistsException(); });
-        return theaterRepository.save(objectMapper.convertValue(theaterDTO, Theater.class));
+    public Theater create(TheaterDTO theaterDto){
+        theaterRepository.findByName(theaterDto.getName()).ifPresent(findTheater -> { throw new DocumentExistsException(Constants.THEATER_NAME_EXISTIS); });
+        return theaterRepository.save(theaterFactory.getTheaterFromTheaterDto(theaterDto));
     }
 
-    public void update(String id, TheaterDTO theaterDTO){
+    public void update(String id, TheaterDTO theaterDto){
         Theater theater = theaterRepository.findById(id).orElseThrow(ObjectNotFoundException::new);
-        theater.updateWith(objectMapper.convertValue(theaterDTO, Theater.class));
+        theater.updateWith(theaterFactory.getTheaterFromTheaterDto(theaterDto));
         theaterRepository.save(theater);
     }
 
